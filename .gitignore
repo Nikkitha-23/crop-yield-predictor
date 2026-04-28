@@ -1,0 +1,9 @@
+data/processed/
+data/raw/
+models/random_forest.pkl
+models/encoders.pkl
+models/feature_names.pkl
+notebooks/*.png
+venv/
+__pycache__/
+*.pyc
