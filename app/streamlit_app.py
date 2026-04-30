@@ -223,7 +223,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
 with tab1:
     predict_clicked = st.button("🔍 Predict Crop Yield")
 
-if predict_clicked:
+   if predict_clicked:
     # ── Build features ────────────────────────────────
     rtr  = rainfall / (temperature + 1)
     fs   = int(fertilizer) + int(irrigation)
@@ -440,7 +440,7 @@ with tab2:
     else:
         st.error("Crop not found in database.")
 
-    with tab3:
+with tab3:
         st.subheader("🌦️ Live Weather & Farm Advisory")
     st.markdown("Enter your city to get real-time weather "
                 "and auto-fill farm conditions.")
