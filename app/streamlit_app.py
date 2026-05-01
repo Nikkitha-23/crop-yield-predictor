@@ -1,3 +1,5 @@
+# import setup
+# setup.setup()
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -12,10 +14,16 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ── Auto setup ─────────────────────────────────────────
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append('src')
+
 import setup
 setup.setup()
+
+from fertilizer_advisor import get_fertilizer_recommendation
+from fertilizer_predictor import predict_fertilizer
+from weather_api import get_current_weather, get_weather_farming_advice
+from crop_recommender import recommend_crops
 
 # ── CSS ────────────────────────────────────────────────
 st.markdown("""
@@ -238,8 +246,82 @@ with tab1:
 with tab2:
     sys.path.append('src')
     from fertilizer_advisor import get_fertilizer_recommendation
+    from fertilizer_predictor import predict_fertilizer
 
     st.subheader("🌿 Smart Fertilizer Advisor")
+# ── ML PREDICTION SECTION ──────────────────────────
+    st.markdown("### 🤖 ML-Based Fertilizer Recommendation")
+    st.info("சில எளிய details கொடுங்க — AI best fertilizer suggest பண்ணும்!")
+
+    ml_col1, ml_col2 = st.columns(2)
+    with ml_col1:
+        ml_crop_stage = st.selectbox("🌱 Crop Growth Stage",
+                        ["Seedling", "Vegetative", "Flowering", "Maturity"])
+        season_map    = {
+            "Kharif (Jun–Oct)"     : "Kharif",
+            "Rabi (Nov–Mar)"       : "Rabi",
+            "Summer (Mar–Jun)"     : "Summer",
+            "Zaid (Short Season)"  : "Zaid",
+        }
+        ml_season_display = st.selectbox("📅 Season", list(season_map.keys()))
+        ml_season         = season_map[ml_season_display]
+        ml_irrigation = st.selectbox("💧 Irrigation Type",
+                        ["Drip", "Sprinkler", "Flood", "Rainfed"])
+    with ml_col2:
+        ml_soil       = st.selectbox("🌍 Soil Type", list(encoders['Soil_Type'].classes_))
+        ml_region     = st.selectbox("📍 Region",    list(encoders['Region'].classes_))
+
+    if st.button("🤖 Get ML Fertilizer Recommendation"):
+        with st.spinner("AI predicting best fertilizer..."):
+            result = predict_fertilizer(
+                soil_type          = ml_soil,
+                soil_ph            = 6.5,
+                soil_moisture      = 40.0,
+                organic_carbon     = 1.5,
+                ec                 = 0.8,
+                nitrogen           = 40.0,
+                phosphorus         = 30.0,
+                potassium          = 35.0,
+                temperature        = temperature,
+                humidity           = 60.0,
+                rainfall           = rainfall,
+                crop_type          = crop,
+                growth_stage       = ml_crop_stage,
+                season             = ml_season,
+                irrigation         = ml_irrigation,
+                previous_crop      = "Rice",
+                region             = ml_region,
+                fert_last_season   = "Urea",
+                yield_last_season  = 4.0,
+            )
+        if 'fertilizer' in result:
+            st.markdown(f"""
+            <div style="background:linear-gradient(135deg,#1B5E20,#2E7D32);border-radius:16px;
+                        padding:1.5rem;text-align:center;margin:1rem 0">
+                <p style="color:#A5D6A7;margin:0">🤖 ML Recommended Fertilizer</p>
+                <h1 style="color:white;margin:0.3rem 0;font-size:2.5rem">🌿 {result['fertilizer']}</h1>
+                <h3 style="color:#69F0AE;margin:0">Confidence: {result['confidence']:.1f}%</h3>
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.markdown("#### 📊 All Fertilizer Probabilities")
+            for item in result['top3']:
+                fert = item['fertilizer']
+                prob = item['probability']
+                bar_color = "#69F0AE" if fert == result['fertilizer'] else "#546E7A"
+                st.markdown(f"""
+                <div style="margin:0.3rem 0">
+                    <span style="color:white;font-size:0.9rem">{fert}</span>
+                    <span style="color:{bar_color};float:right;font-weight:bold">{prob:.1f}%</span>
+                    <div style="background:#333;border-radius:4px;height:8px;margin-top:4px;clear:both">
+                        <div style="background:{bar_color};width:{prob}%;height:8px;border-radius:4px"></div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.error(f"❌ Prediction failed: {result.get('error', 'Unknown error')}")
+
+    st.markdown("---")
     rec = get_fertilizer_recommendation(crop, soil_type, rainfall)
 
     if rec:

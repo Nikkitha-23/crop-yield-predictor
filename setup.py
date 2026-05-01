@@ -1,7 +1,7 @@
 import os
 import urllib.request
 
-HF_BASE = "https://raw.githubusercontent.com/Nikkitha-23/crop-yield-predictor/main/models"
+HF_BASE = "https://huggingface.co/Nikkitha-23/crop-yield-model/resolve/main"
 
 FILES = {
     "models/random_forest.pkl"      : f"{HF_BASE}/random_forest.pkl",
@@ -13,19 +13,28 @@ FILES = {
 }
 
 def setup():
-    if os.path.exists("models/random_forest.pkl"):
-        print("✅ Model already exists!")
+    # Check if ALL models exist locally
+    all_exist = all(os.path.exists(f) for f in FILES.keys())
+
+    if all_exist:
+        print("✅ All models already exist!")
         return
 
-    print("📥 Downloading model from Hugging Face...")
+    print("📥 Downloading models from Hugging Face...")
     os.makedirs("models", exist_ok=True)
 
     for filepath, url in FILES.items():
+        if os.path.exists(filepath):
+            print(f"✅ {filepath} already exists — skipping!")
+            continue
         print(f"Downloading {filepath}...")
-        urllib.request.urlretrieve(url, filepath)
-        print(f"✅ {filepath} downloaded!")
+        try:
+            urllib.request.urlretrieve(url, filepath)
+            print(f"✅ {filepath} done!")
+        except Exception as e:
+            print(f"❌ Failed: {filepath} — {e}")
 
-    print("🎉 All models downloaded successfully!")
+    print("🎉 Setup complete!")
 
 if __name__ == "__main__":
     setup()
