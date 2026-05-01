@@ -1,12 +1,15 @@
 import os
 import urllib.request
 
-HF_BASE = "https://huggingface.co/Nikkitha-23/crop-yield-model/resolve/main"
+HF_BASE = "https://raw.githubusercontent.com/Nikkitha-23/crop-yield-predictor/main/models"
 
 FILES = {
-    "models/random_forest.pkl" : f"{HF_BASE}/random_forest.pkl",
-    "models/encoders.pkl"      : f"{HF_BASE}/encoders.pkl",
-    "models/feature_names.pkl" : f"{HF_BASE}/feature_names.pkl",
+    "models/random_forest.pkl"      : f"{HF_BASE}/random_forest.pkl",
+    "models/encoders.pkl"           : f"{HF_BASE}/encoders.pkl",
+    "models/feature_names.pkl"      : f"{HF_BASE}/feature_names.pkl",
+    "models/fertilizer_model.pkl"   : f"{HF_BASE}/fertilizer_model.pkl",
+    "models/fertilizer_encoders.pkl": f"{HF_BASE}/fertilizer_encoders.pkl",
+    "models/fertilizer_features.pkl": f"{HF_BASE}/fertilizer_features.pkl",
 }
 
 def setup():
